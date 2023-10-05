@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_bookmark/user.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -38,33 +39,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String? firebaseText;
+  List<User> users = [];
 
-  final db = FirebaseFirestore.instance;
+  @override
+  void initState() {
+    super.initState();
 
-  void _addToFirebase() {
-    final user = <String, dynamic>{
-      "first": "Ada",
-      "last": "Lovelace",
-      "born": 1815
-    };
-
-    db.collection("users").add(user).then((DocumentReference doc) =>
-        print('DocumentSnapshot added with ID: ${doc.id}'));
+    _fetchFirebaseData();
   }
 
   void _fetchFirebaseData() async {
-    await db.collection("users").get().then((event) {
-      String text = '';
-      for (var doc in event.docs) {
-        print("${doc.id} => ${doc.data()}");
-        text += '\n';
-        text += doc.data().toString();
-      }
+    final db = FirebaseFirestore.instance;
 
-      setState(() {
-        firebaseText = text;
-      });
+    final event = await db.collection("users").get();
+    final docs = event.docs;
+    final users = docs.map((doc) => User.fromFirestore(doc)).toList();
+
+    setState(() {
+      this.users = users;
     });
   }
 
@@ -75,15 +67,14 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              '${firebaseText ?? 'No data from Firebase'}',
-            ),
-          ],
-        ),
+      body: ListView(
+        children: users.map((user) {
+          return ListTile(
+            title: Text(user.first),
+            subtitle: Text(user.last),
+            trailing: Text(user.born.toString()),
+          );
+        }).toList(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _fetchFirebaseData,
