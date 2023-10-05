@@ -38,10 +38,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String? firebaseText;
+
+  final db = FirebaseFirestore.instance;
 
   void _addToFirebase() {
-    final db = FirebaseFirestore.instance;
-
     final user = <String, dynamic>{
       "first": "Ada",
       "last": "Lovelace",
@@ -52,6 +53,21 @@ class _MyHomePageState extends State<MyHomePage> {
         print('DocumentSnapshot added with ID: ${doc.id}'));
   }
 
+  void _fetchFirebaseData() async {
+    await db.collection("users").get().then((event) {
+      String text = '';
+      for (var doc in event.docs) {
+        print("${doc.id} => ${doc.data()}");
+        text += '\n';
+        text += doc.data().toString();
+      }
+
+      setState(() {
+        firebaseText = text;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,18 +75,18 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: const Center(
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
+              '${firebaseText ?? 'No data from Firebase'}',
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addToFirebase,
+        onPressed: _fetchFirebaseData,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
