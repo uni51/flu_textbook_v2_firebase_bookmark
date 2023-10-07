@@ -1,9 +1,8 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+// ignore: must_be_immutable
 class AddPage extends StatelessWidget {
   AddPage({Key? key}) : super(key: key);
 
@@ -11,34 +10,62 @@ class AddPage extends StatelessWidget {
   String last = "";
   int born = 0;
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TextField(
-              decoration: const InputDecoration(
-                hintText: 'First',
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'First',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'First Name（名）を入力してください';
+                  }
+                  return null;
+                },
+                onChanged: (text) {
+                  first = text;
+                },
               ),
-              onChanged: (text) {
-                first = text;
-              },
-            ),
-            TextField(
-              decoration: const InputDecoration(
-                hintText: 'Last',
+              TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Last',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Last Name（姓）を入力してください';
+                  }
+                  return null;
+                },
+                onChanged: (text) {
+                  last = text;
+                },
               ),
-              onChanged: (text) {
-                last = text;
-              },
-            ),
-            TextField(
+              TextFormField(
                 decoration: const InputDecoration(
                   hintText: '1990',
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '生まれた年を入力してください';
+                  }
+                  if (value.length != 4) {
+                    return '4桁の西暦で入力してください';
+                  }
+                  if (int.parse(value) > DateTime.now().year ) {
+                    return '過去の年で入力してください';
+                  }
+                  return null;
+                },
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(4),
@@ -47,15 +74,23 @@ class AddPage extends StatelessWidget {
                 onChanged: (text) {
                   born = int.parse(text);
                 },
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await _addToFirebase();
-                Navigator.pop(context);
-              },
-              child: Text("Add to Firebase"),
-            ),
-          ],
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    await _addToFirebase();
+                    // ignore: use_build_context_synchronously
+                    Navigator.pop(context);
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   const SnackBar(content: Text('更新しました')),
+                    // );
+                  }
+                },
+                child: Text("Add to Firebase"),
+              ),
+            ],
+          ),
         ),
       ),
     );
