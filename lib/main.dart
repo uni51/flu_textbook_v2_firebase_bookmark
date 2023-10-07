@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text("Select Year"),
+                    title: const Text("Select Year"),
                     content: Container(
                       width: 300,
                       height: 300,
@@ -97,7 +97,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           });
 
                           Navigator.pop(context);
-
                           _fetchFirebaseData();
                         },
                       ),
@@ -106,10 +105,47 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               );
             },
-            onLongPress: () async {
-              final db = FirebaseFirestore.instance;
-              await db.collection("users").doc(user.id).delete();
-              _fetchFirebaseData();
+            // onLongPress: () async {
+            //   final db = FirebaseFirestore.instance;
+            //   await db.collection("users").doc(user.id).delete();
+            //   _fetchFirebaseData();
+            // },
+            onLongPress: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('本当に削除しますか？'),
+                    content: const SizedBox(
+                      height: 5,
+                    ),
+                    actions: <Widget>[
+                      GestureDetector(
+                        child: const Text('いいえ'),
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      GestureDetector(
+                        child: const Text('はい'),
+                        onTap: () {
+                          final db = FirebaseFirestore.instance;
+                          db.collection("users").doc(user.id).delete();
+
+                          Navigator.pop(context);
+                          _fetchFirebaseData();
+                        },
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           );
         }).toList(),
