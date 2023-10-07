@@ -74,6 +74,43 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text(user.first),
             subtitle: Text(user.last),
             trailing: Text(user.born.toString()),
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Select Year"),
+                    content: Container(
+                      width: 300,
+                      height: 300,
+                      child: YearPicker(
+                        firstDate: DateTime(DateTime.now().year - 300, 1),
+                        lastDate: DateTime(DateTime.now().year + 100, 1),
+                        initialDate: DateTime.now(),
+                        selectedDate: DateTime(user.born),
+                        onChanged: (DateTime dateTime) {
+                          FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(user.id)
+                              .update({
+                            'born': dateTime.year,
+                          });
+
+                          Navigator.pop(context);
+
+                          _fetchFirebaseData();
+                        },
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            onLongPress: () async {
+              final db = FirebaseFirestore.instance;
+              await db.collection("users").doc(user.id).delete();
+              _fetchFirebaseData();
+            },
           );
         }).toList(),
       ),
