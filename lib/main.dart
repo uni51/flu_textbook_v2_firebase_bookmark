@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_bookmark/user.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'add_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: '誕生年リスト'),
     );
   }
 }
@@ -77,10 +78,18 @@ class _MyHomePageState extends State<MyHomePage> {
         }).toList(),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _fetchFirebaseData,
+        onPressed: _goToAddPage,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void _goToAddPage() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddPage()),
+    );
+    _fetchFirebaseData();
   }
 }
